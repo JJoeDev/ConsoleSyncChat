@@ -9,13 +9,11 @@
 using asio::ip::tcp;
 
 void hostChat(tcp::socket& sock, std::string& uname){
-	bool running{ true };
-
 	asio::streambuf buf;
 
 	std::string reply;
 	std::string msg;
-	while (running) {
+	while (true) {
 		asio::read_until(sock, buf, '\n');
 		msg = asio::buffer_cast<const char*>(buf.data());
 		std::cout << msg << std::endl;
@@ -27,7 +25,6 @@ void hostChat(tcp::socket& sock, std::string& uname){
 
 		asio::write(sock, asio::buffer(reply + '\n'));
 	}
-
 	sock.close();
 }
 
@@ -40,8 +37,6 @@ void accept(asio::io_context& ctx, tcp::acceptor& acceptor, std::string& uname) 
 }
 
 void host(asio::io_context& ctx) {
-	bool running;
-
 	short port;
 	std::string uname;
 
@@ -69,7 +64,6 @@ void client(asio::io_context& ctx) {
 
 	std::string ip, uname;
 	short port;
-	bool running{ true };
 	asio::streambuf buf;
 
 	iLOG("Choose a username");
@@ -91,7 +85,7 @@ void client(asio::io_context& ctx) {
 
 	std::string reply;
 	std::string msg;
-	while (running) {
+	while (true) {
 		std::getline(std::cin, reply);
 		reply = uname + " : [MSG] " + reply;
 
@@ -104,7 +98,6 @@ void client(asio::io_context& ctx) {
 
 		buf.consume(buf.size());
 	}
-
 	sock.close();
 }
 
@@ -120,14 +113,17 @@ int main() {
 
 	std::cin >> choice;
 
-	if (choice != 'h' && choice != 'c') {
+	switch(choice)
+	{
+		case 'c':
+			client(ctx);
+			break;
+		case 'h':
+			host(ctx);
+			break;
+		default:
 		eLOG("INVALID CHOICE");
-	}
-	else if (choice == 'c') {
-		client(ctx);
-	}
-	else {
-		host(ctx);
+			break;
 	}
 
 	return 0;
